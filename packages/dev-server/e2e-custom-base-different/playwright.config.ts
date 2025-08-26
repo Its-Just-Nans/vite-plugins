@@ -21,4 +21,5 @@ export default defineConfig({
     port: 6173,
     reuseExistingServer: !process.env.CI,
   },
+  testDir: '../e2e-custom-base',
 })
