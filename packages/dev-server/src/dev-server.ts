@@ -159,6 +159,9 @@ export function devServer(options?: DevServerOptions): VitePlugin {
             if (viteBase === defaultBase) {
               // we need to rewrite the url for vite
               req.url = urlFile
+            } else {
+              // we need to rewrite the url for vite and use the viteBase
+              req.url = joinPath(viteBase, urlFile)
             }
             const filePath = path.join(publicDirPath, urlFile)
             try {
