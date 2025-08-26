@@ -17,7 +17,9 @@ test('Should contain an injected script tag', async ({ page }) => {
   expect(nonce).toBeNull()
 
   const content = await lastScriptTag?.textContent()
-  expect(content).toBe('import("/docs/@vite/client")')
+
+  const vbase = process.env.VBASE ?? '/'
+  expect(content).toBe(`import("${vbase}@vite/client")`)
 })
 
 test('Should exclude the file specified in the exclude option', async ({ page }) => {

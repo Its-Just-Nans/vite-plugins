@@ -261,7 +261,7 @@ export function devServer(options?: DevServerOptions): VitePlugin {
                 options?.injectClientScript !== false &&
                 response.headers.get('content-type')?.match(/^text\/html/)
               ) {
-                const viteScript = joinPath(honoBase, '/@vite/client')
+                const viteScript = joinPath(viteBase, '/@vite/client')
                 const nonce = response.headers
                   .get('content-security-policy')
                   ?.match(/'nonce-([^']+)'/)?.[1]
