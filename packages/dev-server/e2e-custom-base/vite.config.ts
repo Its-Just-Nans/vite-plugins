@@ -7,7 +7,7 @@ export default defineConfig(async () => {
     base: process.env.VBASE, // possible custom base
     plugins: [
       devServer({
-        entry: './mock/worker.ts',
+        entry: '../e2e/mock/worker.ts',
         base: '/docs/',
         exclude: [...defaultOptions.exclude, '/app/**'],
         adapter: cloudflareAdapter,
