@@ -145,7 +145,6 @@ export function devServer(options?: DevServerOptions): VitePlugin {
           res: http.ServerResponse,
           next: Connect.NextFunction
         ): Promise<void> {
-          console.error(req.url)
           if (honoBase !== defaultBase && !req.url?.startsWith(honoBase)) {
             // handle all other URL that are not /<viteBase>
             res.statusCode = 404
