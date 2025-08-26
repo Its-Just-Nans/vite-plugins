@@ -129,7 +129,7 @@ const puglinName = '@hono/vite-dev-server'
 
 export function devServer(options?: DevServerOptions): VitePlugin {
   let publicDirPath = ''
-  const baseUrl = options?.base ?? defaultBase
+  const honoBase = options?.base ?? defaultBase
   let viteBase = defaultBase
   const entry = options?.entry ?? defaultOptions.entry
   const plugin: VitePlugin = {
@@ -146,17 +146,17 @@ export function devServer(options?: DevServerOptions): VitePlugin {
           next: Connect.NextFunction
         ): Promise<void> {
           console.error(req.url)
-          if (baseUrl !== defaultBase && !req.url?.startsWith(baseUrl)) {
+          if (honoBase !== defaultBase && !req.url?.startsWith(honoBase)) {
             // handle all other URL that are not /<viteBase>
             res.statusCode = 404
             res.setHeader('Content-Type', 'text/plain')
             res.end(
-              `This URL is not handled by the hono server since you're using a custom ${puglinName} base ${baseUrl}`
+              `This URL is not handled by the hono server since you're using a custom ${puglinName} base ${honoBase}`
             )
             return
           }
           if (req.url) {
-            const urlFile = removeBasePath(baseUrl, req.url)
+            const urlFile = removeBasePath(honoBase, req.url)
             if (viteBase === defaultBase) {
               // we need to rewrite the url for vite
               req.url = urlFile
@@ -259,7 +259,7 @@ export function devServer(options?: DevServerOptions): VitePlugin {
                 options?.injectClientScript !== false &&
                 response.headers.get('content-type')?.match(/^text\/html/)
               ) {
-                const viteScript = joinPath(baseUrl, '/@vite/client')
+                const viteScript = joinPath(honoBase, '/@vite/client')
                 const nonce = response.headers
                   .get('content-security-policy')
                   ?.match(/'nonce-([^']+)'/)?.[1]
