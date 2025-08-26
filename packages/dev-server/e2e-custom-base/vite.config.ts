@@ -4,10 +4,10 @@ import cloudflareAdapter from '../src/adapter/cloudflare'
 
 export default defineConfig(async () => {
   return {
-    base: '/docs/',
     plugins: [
       devServer({
         entry: './mock/worker.ts',
+        base: '/docs/',
         exclude: [...defaultOptions.exclude, '/app/**'],
         adapter: cloudflareAdapter,
       }),

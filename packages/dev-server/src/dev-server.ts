@@ -21,7 +21,9 @@ import type { Env, Fetch, EnvFunc, Adapter, LoadModule } from './types.js'
  * ```
  */
 const removeBasePath = (basePath: string, route: string): string => {
-  if (!route.startsWith(basePath)) return route
+  if (!route.startsWith(basePath)) {
+    return route
+  }
   const offset = basePath.length - (basePath.endsWith('/') ? 1 : 0)
   return route.slice(offset)
 }
@@ -57,6 +59,7 @@ const joinPath = (basePath: string, path: string): string => {
 export type DevServerOptions = {
   entry?: string
   export?: string
+  base?: string
   injectClientScript?: boolean
   exclude?: (string | RegExp)[]
   ignoreWatching?: (string | RegExp)[]
@@ -97,6 +100,7 @@ export type DevServerOptions = {
 export const defaultOptions: Required<Omit<DevServerOptions, 'env' | 'adapter' | 'loadModule'>> = {
   entry: './src/index.ts',
   export: 'default',
+  base: '/',
   injectClientScript: true,
   exclude: [
     /.*\.css$/,
@@ -120,14 +124,16 @@ export const defaultOptions: Required<Omit<DevServerOptions, 'env' | 'adapter' |
   },
 }
 
-const defaultViteBase = '/'
+const defaultBase = '/'
+const puglinName = '@hono/vite-dev-server'
 
 export function devServer(options?: DevServerOptions): VitePlugin {
   let publicDirPath = ''
-  let viteBase = defaultViteBase
+  const baseUrl = options?.base ?? defaultBase
+  let viteBase = defaultBase
   const entry = options?.entry ?? defaultOptions.entry
   const plugin: VitePlugin = {
-    name: '@hono/vite-dev-server',
+    name: puglinName,
     configResolved(config) {
       publicDirPath = config.publicDir
       viteBase = config.base
@@ -139,19 +145,22 @@ export function devServer(options?: DevServerOptions): VitePlugin {
           res: http.ServerResponse,
           next: Connect.NextFunction
         ): Promise<void> {
-          if (viteBase !== defaultViteBase && !req.url?.startsWith(viteBase)) {
+          console.error(req.url)
+          if (baseUrl !== defaultBase && !req.url?.startsWith(baseUrl)) {
             // handle all other URL that are not /<viteBase>
             res.statusCode = 404
             res.setHeader('Content-Type', 'text/plain')
             res.end(
-              `This URL is not handled by the hono server since you're using a custom vite base ${viteBase}`
+              `This URL is not handled by the hono server since you're using a custom ${puglinName} base ${baseUrl}`
             )
             return
           }
           if (req.url) {
-            const urlFile = removeBasePath(viteBase, req.url)
-            // filePath should be the path to the public file
-            // but req.url should still have the viteBase inside (for vite)
+            const urlFile = removeBasePath(baseUrl, req.url)
+            if (viteBase === defaultBase) {
+              // we need to rewrite the url for vite
+              req.url = urlFile
+            }
             const filePath = path.join(publicDirPath, urlFile)
             try {
               if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
@@ -250,7 +259,7 @@ export function devServer(options?: DevServerOptions): VitePlugin {
                 options?.injectClientScript !== false &&
                 response.headers.get('content-type')?.match(/^text\/html/)
               ) {
-                const viteScript = joinPath(viteBase, '/@vite/client')
+                const viteScript = joinPath(baseUrl, '/@vite/client')
                 const nonce = response.headers
                   .get('content-security-policy')
                   ?.match(/'nonce-([^']+)'/)?.[1]
