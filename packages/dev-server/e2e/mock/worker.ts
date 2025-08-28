@@ -114,7 +114,7 @@ app.get('/ip', (c) => {
 app.get('/path', (c) => {
   return c.json({
     path: c.req.path,
-    url: c.req.url
+    url: c.req.url,
   })
 })
 
